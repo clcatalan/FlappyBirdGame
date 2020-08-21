@@ -9,7 +9,7 @@ pygame.font.init()
 WIN_WIDTH = 500
 WIN_HEIGHT = 800
 
-GEN = 1
+GEN = 0
 
 #scale image to 2x size
 BIRD_IMGS = [

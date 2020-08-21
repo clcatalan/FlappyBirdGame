@@ -96,6 +96,77 @@ class Bird:
         return pygame.mask.from_surface(self.img)
 
 
+class Pipe:
+    GAP = 200 #space b/w pipe ends
+    VEL = 5
+
+    def __init__(self,x):
+        self.x = x
+        self.height = 0
+
+        self.top = 0
+        self.bottom = 0
+        self.PIPE_TOP = pygame.transform.flip(PIPE_IMG, False, True) #some pipes facing downward
+        self.PIPE_BOTTOM = PIPE_IMG
+
+        self.passed = False
+        self.setHeight()
+
+    def setHeight(self):
+        self.height = random.randrange(40, 450) #placement of top of pipe
+        self.top = self.height - self.PIPE_TOP.get_height()
+        self.bottom = self.height + self.GAP
+
+    def move(self):
+        self.x -= self.VEL
+
+    def draw(self, win):
+        win.blit(self.PIPE_TOP, (self.x, self.top))
+        win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
+
+    def collide(self, bird):
+        birdMask = bird.getMask()
+        topMask = pygame.mask.from_surface(self.PIPE_TOP)
+        bottomMask = pygame.mask.from_surface(self.PIPE_BOTTOM)
+
+        topOffset = (self.x - bird.x, self.top - round(bird.y))
+        bottomOffset = (self.x - bird.x, self.bottom - round(bird.y))
+
+        #check if masks collide via pts of collision
+        bPoint = birdMask.overlap(bottomMask, bottomOffset)
+        tPoint = birdMask.overlap(topMask, topOffset)
+
+        if tPoint or bPoint: #if any of these pts exist, it means there's a collision
+            return True
+        
+        return False
+
+class Base:
+    VEL = 5
+    WIDTH = BASE_IMG.get_width()
+    IMG = BASE_IMG
+
+    def __init__(self, y):
+        self.y = y
+        self.x1 = 0
+        self.x2 = self.WIDTH
+    
+    def move(self):
+        self.x1 -= self.VEL
+        self.x2 -= self.VEL
+
+        #horizontal parallax for base
+        if self.x1 + self.WIDTH < 0:
+            self.x1 = self.x2 + self.WIDTH
+
+        if self.x2 + self.WIDTH < 0:
+            self.x2 = self.x1 + self.WIDTH
+
+    def draw(self, win):
+        win.blit(self.IMG, (self.x1, self.y))
+        win.blit(self.IMG, (self.x2, self.y))
+        
+
 def drawWindow(win, bird):
     win.blit(BG_IMG, (0,0))
     bird.draw(win) #draw the bird
